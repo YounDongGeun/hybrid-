@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>윤동근의 포트폴리오</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <!-- CDN(contents Delivery Network)방식으로  파일 인클루드-->
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <!-- src = source -->
+    <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'></script>
+    <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js"></script>
+<!--  자바스크립트  -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src ="http://code.jquery.com/jquery-latest.min.js" charset="utf-8"></script>
+<!-- / 자바스크립트  -->
+    <script>
+    var dx = 0;
+    var dy = 0;
+    function startJS(){
+      dx = 10;
+      dy = (Math.random()-0.5)*10;
+    }
+
+    $(document).ready(function() {
+        var canvas = $("#canvas")[0];
+        var ctx = canvas.getContext("2d");
+        var x = canvas.width/2;//캔퍼스 폭 중앙
+        var y = canvas.height -215;//캔퍼스 바닥에서 230떨어진 곳
+
+        //--------------------------------------------------------------------
+        var barY1 = 3;
+        var barY2 = 3;
+        var ballRadius = 10;
+
+        var p1S = false;
+        var p2S = false;
+        var p1Score = 0;
+        var p2Score = 0;
+
+        var player1 = new drawPaddlePlayer1();
+        var player2 = new drawPaddlePlayer2();
+        var ball = new drawBall();
+        var paddleHeight = 75;
+        var paddleWidht = 10;
+        var player1paddleX = (canvas.width - paddleWidht*57);
+        var player1paddleY = ((canvas.height - paddleHeight)/2);
+        var player2paddleX = (canvas.width - paddleWidht*4);
+        var player2paddleY = ((canvas.height - paddleHeight)/2);
+//------------------------------------------------------------------------------------
+        this.keypress_table = {};
+        this.fireKeydown = function(event){
+          var _this = game;
+          _this.keypress_table[event.code.toString()] = true;
+        }
+
+        $(function(){
+          var keypress = {};
+          setInterval(function(){
+            // p1
+            if(keypress['81'] && player1paddleY > 0){
+              player1paddleY -= barY1;
+              console.log(player1paddleY);
+             }
+             else if(keypress ['81'] && player1paddleY < 0){
+               player1paddleY = 0;
+               console.log(player1paddleY);
+             }
+            if(keypress['65'] && player1paddleY < (canvas.height-75)){
+              player1paddleY += barY1;
+              console.log(player1paddleY);
+            } // down - s
+            else if(keypress['65'] && player1paddleY > (canvas.height-75)){
+              player1paddleY = canvas.height-75;
+              console.log(player1paddleY);
+            }
+
+          }, 7);
+
+          $(document).keydown(function(e){
+            keypress[e.which.toString()] = true;
+          });
+          $(document).keyup(function(e){
+            keypress[e.which.toString()] = false;
+          });
+        });
+
+        function drawPaddlePlayer1(){
+          ctx.beginPath();
+          ctx.rect(player1paddleX, player1paddleY, paddleWidht, paddleHeight);
+          ctx.fillStyle = "#00FFFF";
+          ctx.fill();
+          ctx.closePath();
+          this.crashWith = function(otherobj) {
+          var myleft = player2paddleX;
+          var myright = player2paddleX + paddleWidht;
+          var mytop = player2paddleY;
+          var mybottom = player2paddleY + paddleHeight;
+          var otherleft = x;
+          var otherright = x;
+          var othertop = y;
+          var otherbottom = y;
+          var crash = true;
+          if ((mybottom < othertop)||(mytop > otherbottom)||(myright < otherleft)||(myleft > otherright)) {
+            crash = false;
+            }
+          return crash;
+          }
+        }
+        function drawPaddlePlayer2(){
+          ctx.beginPath();
+          ctx.rect(player2paddleX, player2paddleY, paddleWidht, paddleHeight);
+          ctx.fillStyle = "#FFFF00";
+          ctx.fill();
+          ctx.closePath();
+          this.crashWith = function(otherobj) {
+          var myleft = player1paddleX;
+          var myright = player1paddleX + paddleWidht;
+          var mytop = player1paddleY;
+          var mybottom = player1paddleY + paddleHeight;
+          var otherleft = x;
+          var otherright = x;
+          var othertop = y;
+          var otherbottom = y;
+          var crash = true;
+          if ((mybottom < othertop)||(mytop > otherbottom)||(myright < otherleft)||(myleft > otherright)) {
+            crash = false;
+            }
+          return crash;
+          }
+        }
+        function drawBall(){
+          ctx.beginPath();
+          ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+          ctx.fillStyle = "#0095DD";
+          ctx.fill();
+          ctx.closePath();
+        }
+        function drawBallAct(){
+          ctx.beginPath();
+          ctx.arc(x, y, ballRadius+1, 0, Math.PI*2);
+          ctx.fillStyle = "#000000";
+          ctx.fill();
+          ctx.closePath();
+        }
+
+        function moveAll(){
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+            ctx.font = "200px Georgia";
+            ctx.fillStyle = "#ffaacc"
+            ctx.fillText(p1Score, canvas.width/6, canvas.height/2+40);
+
+            ctx.font = "200px Georgia";
+            ctx.fillStyle = "#5f5f5f"
+            ctx.fillText(":", canvas.width/2-20, canvas.height/2+40);
+
+            ctx.font = "200px Georgia";
+            ctx.fillStyle = "#ffccaa"
+            ctx.fillText(p2Score, canvas.width-215, canvas.height/2+40);
+
+          drawBall();
+          drawPaddlePlayer1();
+          drawPaddlePlayer2();
+
+
+          if(y + dy > canvas.height-ballRadius || y + dy < ballRadius ){ // 위 아래벽 튕겨내기
+            dy = -dy;
+            drawBallAct();
+          }
+          if(x + dx > canvas.width-ballRadius){
+            p1S = true
+            if(p1S == true){
+              p1Score = p1Score + 1;
+              if(p1Score == 14){
+                alert("1player win!")
+                p1Score = 0;
+                p2Score = 0;
+              }
+            }
+            x = canvas.width/2;
+            y = canvas.height -130;
+            dx = -10;
+            dy = (Math.random()-0.5)*10;
+            paddleHeight = 75;
+            paddleWidht = 10;
+            p1S = false;
+          }
+          if( x + dx < ballRadius){
+            p2S = true
+            if(p2S == true){
+              p2Score = p2Score + 1;
+              if(p2Score == 14){
+                alert("2player win!")
+                p1Score = 0;
+                p2Score = 0;
+              }
+            }
+            x = canvas.width/2;
+            y = canvas.height -130;
+            dx = 10;
+            dy = (Math.random()-0.5)*10;
+            paddleHeight = 75;
+            paddleWidht = 10;
+            p2S = false;
+          }
+//------------------------------------------------------------------------------------------------
+          x += dx;
+          y += dy;
+          player2paddleY = y-(Math.random()-0.5)*30;
+          if(player1.crashWith(ball)){
+            dx = -dx;
+            dy = (Math.random()-0.5)*10;
+          }
+          if(player2.crashWith(ball)){
+            dx = -dx;
+            dy = (Math.random()-0.5)*10;
+          }
+        }
+        setInterval(moveAll, 20);
+      });
+    </script>
+
+  </head>
+  <style>
+    img{ max-width:100%; height:auto }
+    #pp{max-width:20%; height:auto; float:left}
+    #table{max-width:100%; height:auto; font-size:25px}
+    .portal{max-width:100%; height:100%;}
+
+    /* 자바스크립트 */
+    *{padding: 0; margin: 0;}
+      canvas{background: #eee; display: block; margin: 0 auto;}
+
+      /* 방명록 */
+    .mini{
+        width : 30%;
+        display: inline-block;
+    }
+    .mother_class{
+        margin-top : 3%;
+        padding-left: 2%;
+        padding-right: 2%;
+    }
+    .child_class{
+        margin-top : 1%;
+        padding-left: 10%;
+        padding-right: 10%;
+    }
+    .default_hide{
+        display: none;
+    }
+  </style>
+  <body>
+    <!--모든 페이지는 body 태그 안쪽에 속성이 data-role="page"인 엘리먼트로 시작된다.-->
+    <!-- data-role는 jQuery mobile에서 해당 엘리먼트가 어떤 UI인지를 지정한다.
+    아래 page는 이 엘리먼트가 가장 큰 단위인 페이지임을 의미한다. -->
+    <div data-role="page" id="intro">
+    <div data-role="header">
+      <h1>신인개발자 윤동근입니다.</h1>
+    </div>
+        <img id = "loadingimg" position="relative" src="fish.png" alt="" width="100%" onclick="location.href='#main'">
+    <div data-role="footer" data-role="fixed">
+      <h2>뿌슝빠슝 곡혐 인트로입니다</h2>
+    </div>
+    </div>
+    <div data-role="page" id="main">
+      <!--제목과 글로벌 메뉴를 표시하는 엘리먼트를 지정-->
+      <div data-role="header">
+        <h1>신인개발자 윤동근입니다.</h1>
+      </div>
+      <div data-role="content" id="cont1">
+        <p><img src="ydg.png" id="pp" alt="Cinque Terre">
+          <div data-role="content" id="cont1">
+          <table data-role="table" id="table" class="ui-responsive">
+            <thead>
+              <tr>
+                <th>이름 : </th><th>윤동근</th>
+              </tr>
+              <tr>
+                <th>학교 : </th><th>동의과학대학교</th>
+              </tr>
+              <tr>
+                <th>학번 : </th><th>201750005</th>
+              </tr>
+              <tr>
+                <th>연락처 : </th><th>010-3427-0114</th>
+              </tr>
+              <tr>
+                <th>이메일 : </th><th>say_my_name_@naver.com</th>
+              </tr>
+            </thead>
+          </table>
+          </div>
+        </p>
+        <hr><br>
+        <ul data-role="listview" data-inset="true" data-filter="true"><!-- 검색창 부분을 생성 -->
+          <!--위의 리스트뷰의 검색이 가능한 버튼 부분-->
+          <li><a href="#java">JAVA</a></li>
+          <li><a href="#javascript">JAVAScript</a></li>
+          <li><a href="#cloud">Cliud Computing</a></li>
+          <li><a href="#capstone">CAPSTONE</a></li>
+          <li><a href="#guestbook">방명록남기</a></li>
+        </ul>
+
+        <ul data-role="listview" data-inset="true" data-filter="false"><!-- 검색창 부분을 생성 -->
+          <!--위의 리스트뷰의 검색이 가능한 버튼 부분-->
+          <li><a href="https://www.acmicpc.net/"><img class="portal" src="jon.png" alt="백준이동"/></a></li>
+          <li><a href="https://www.codewars.com/"><img class="portal" src="codewars.png" alt="코드워즈이동"/></a></li>
+          <li><a href="https://www.hackerrank.com/"><img class="portal" src="hack.jpg" alt="해커랭크이동"/></a></li>
+        </ul>
+
+        <!-- Swiper 하려고했는데 안함 -->
+
+    </div>
+      <form>
+        <label for="slider-0">Input slider:</label>
+        <input type="range" name="slider" value="25" id="slider" min="0" max="100"/>
+      </form>
+      <a href="#" data-role="button" data-icon="home">버튼입니당</a><!-- home, star, plus -->
+    </div>
+
+    <!-- 자바페이지 -->
+    <div data-role="page" id="java" data-theme="b">
+      <div data-role="header">
+        <h1>JAVA 프로젝트 입니다</h1>
+        <button type="button" class="btn btn-outline-primary" onclick="location.href='#main'">메인으로</button>
+      </div>
+      <div data-role="content">
+        <img src="java/팀.png" class="img-fluid" alt="Cinque Terre">
+        <img src="java/로그인.png" class="img-fluid" alt="Cinque Terre">
+        <img src="java/회원가입기능.png" class="img-fluid" alt="Cinque Terre">
+        <img src="java/메인.png" class="img-fluid" alt="Cinque Terre">
+        <img src="java/게시판.png" class="img-fluid" alt="Cinque Terre">
+        <img src="java/글관리.png" class="img-fluid" alt="Cinque Terre">
+      </div>
+      <div data-role="footer" data-role="fixed">
+        <h2>JAVA 프로젝트</h2>
+      </div>
+    </div>
+
+    <!-- 자바스크립트 페이지 -->
+    <div data-role="page" id="javascript" data-theme="b">
+      <div data-role="header">
+        <h1>JAVAScript 프로젝트 입니다</h1>
+      </div>
+      <div data-role="content">
+        <button type="button" class="btn btn-outline-primary" onclick="location.href='#main'">메인으로</button>
+        <hr>
+        <button type="button" class="btn btn-outline-primary" onclick='startJS()'>게임시작</button>
+        <canvas id="canvas" width="600" height="420">
+        </canvas>
+      </div>
+      <div data-role="footer" data-role="fixed">
+        <h2>JAVAScript 프로젝트</h2>
+      </div>
+    </div>
+
+    <!-- 클라우드 페이지 -->
+    <div data-role="page" id="cloud" data-theme="b">
+      <div data-role="header">
+        <h1>Cloud 프로젝트 입니다</h1>
+      </div>
+      <button type="button" class="btn btn-outline-primary" onclick="location.href='#main'">메인으로</button>
+      <hr>
+      <div data-role="content">
+        <img src="cloud/led온오프.png" alt="Cinque Terre">
+        <img src="cloud/led온오프모바일.png" alt="Cinque Terre">
+        <img src="cloud/온습도온오프.png" alt="Cinque Terre">
+        <img src="cloud/온습도온오프모바일.png" alt="Cinque Terre">
+      </div>
+      <div data-role="footer" data-role="fixed">
+        <h2>Cloud 프로젝트</h2>
+      </div>
+    </div>
+
+    <!-- 캡스톤 페이지 -->
+    <div data-role="page" id="capstone" data-theme="b">
+      <div data-role="header">
+        <h1>CAPSTONE 프로젝트 입니다</h1>
+      </div>
+      <div data-role="content">
+        <button type="button" class="btn btn-outline-primary" onclick="location.href='#main'">메인으로</button>
+        <hr>
+        <img src="cap/캡스톤주제.png" alt="Cinque Terre" width="720" height="320">
+        <img src="cap/제출용1번학습.png" alt="Cinque Terre" width="720" height="320">
+        <img src="cap/제출용2번대화.png" alt="Cinque Terre" width="720" height="320">
+      </div>
+      <div data-role="footer" data-role="fixed">
+        <h2>CAPSTONE 프로젝트</h2>
+      </div>
+    </div>
+
+    <!-- 방명록 페이지 -->
+    <div data-role="page" id="guestbook" data-theme="b">
+      <div data-role="header">
+        <h1>*^^*방몀록을 남겨주세요*^^*</h1>
+      </div>
+      <div data-role="content">
+        <button type="button" class="btn btn-outline-primary" onclick="location.href='#main'">메인으로</button>
+        <hr>
+        <?php
+        $conn = mysqli_connect(
+            '127.0.0.1',
+            'root',
+            '',
+            'ydg'
+        );
+    
+        $sql = "select * from test";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result);
+        echo '<h1>'.$row['inttest1'].'</h1>';
+        echo $row['inttest2'];
+        echo $row['stringtest1'];
+        echo $row['stringtest2'];
+    ?>
+<!--
+        <form method="POST" action="">
+          이름 입력 : <input type="text" name="">
+          메시지 입력 : <input type="text" name="">
+          <input type="submit" value="확인">
+        </form>
+
+        <form method="POST" action="">
+          이름 입력 : <input type="text" name="">
+          메시지 입력 : <input type="text" name="">
+          <input type="submit" value="확인">
+        </form>
+
+-->
+      <div data-role="footer" data-role="fixed">
+        <h2>방명록을 남겨주세요</h2>
+      </div>
+    </div>
+  </body>
+</html>
